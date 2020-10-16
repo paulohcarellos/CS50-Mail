@@ -56,9 +56,10 @@ function load_mailbox(mailbox) {
   const inboxDiv = document.querySelector('#inbox-view');
   inboxDiv.innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
 
-  fetch('/emails/inbox')
+  fetch(`/emails/${mailbox}`)
   .then(response => response.json())
   .then(emails => {
+
       if(emails.length > 0){
 
         const inboxList = document.createElement('div');
@@ -71,7 +72,7 @@ function load_mailbox(mailbox) {
             <span class='list-group-item-subject'>${email.subject}</span>
             <span class='list-group-item-timestamp'>${email.timestamp}</span>`
 
-          if (email.read) {
+          if (email.read || mailbox != 'inbox') {
             inboxMail.style.backgroundColor = '#F8F9FA';
           }
 
@@ -82,6 +83,17 @@ function load_mailbox(mailbox) {
         inboxDiv.append(inboxList);
       }  
   });
+
+  const archive = document.querySelector('#archive');
+
+  if (mailbox === 'inbox') {
+    archive.innerHTML = 'Archive'
+    archive.addEventListener('click', () => archive_email(id, true));
+  }
+  else {
+    archive.innerHTML = 'Unarchive'
+    archive.addEventListener('click', () => archive_email(id, false));
+  }
 }
 
 function read_email(id) {
@@ -93,7 +105,6 @@ function read_email(id) {
   fetch(`/emails/${id}`)
   .then(response => response.json())
   .then(email => {
-    console.log(email)
 
     let recipients = '';
 
@@ -113,5 +124,16 @@ function read_email(id) {
     body: JSON.stringify({
         read: true
     })
-  });  
+  })  
+}
+
+function archive_email(id, value) {
+
+  fetch(`/emails/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+        archived: true
+    })
+  })
+  .then(() => load_mailbox((value ? 'archive' : 'inbox')))
 }
