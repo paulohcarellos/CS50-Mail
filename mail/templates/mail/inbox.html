@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block body %}
-    <h2>{{ request.user.email }}</h2>
+    <br><h2>{{ request.user.email }}</h2>
 
     <button class="btn btn-sm btn-outline-primary" id="inbox">Inbox</button>
     <button type="button" class="btn btn-sm btn-outline-primary" id="compose">Compose</button>
@@ -11,10 +11,7 @@
     <a class="btn btn-sm btn-outline-primary" href="{% url 'logout' %}">Log Out</a>
     <hr>
 
-    <div id="emails-view">
-        <table id="emails-inbox" style="border: 1px solid black;">
-            <th>Primary</th>
-        </table>
+    <div id="inbox-view">
     </div>
 
     <div id="compose-view">
@@ -32,6 +29,15 @@
             <textarea class="form-control" id="compose-body" placeholder="Body"></textarea>
             <input type="submit" class="btn btn-primary">
         </form>
+    </div>
+
+    <div id="email-view">
+        <h3 id="email-subject"></h3>
+        <b>From: </b><span id="email-from"></span><br>
+        <b>To: </b><span id="email-to"></span><br>
+        <b>Date: </b><span id="email-date"></span><hr>
+        <p id="email-body"></p>
+        <button class="btn btn-sm btn-outline-primary" id="reply">Reply</button>
     </div>
 {% endblock %}
 

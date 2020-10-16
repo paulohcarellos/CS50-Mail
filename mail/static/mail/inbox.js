@@ -15,7 +15,8 @@ document.addEventListener('DOMContentLoaded', function() {
 function compose_email() {
 
   // Show compose view and hide other views
-  document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#inbox-view').style.display = 'none';
+  document.querySelector('#email-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
 
   // Clear out composition fields
@@ -39,7 +40,7 @@ function send_email() {
     })
   })
   .then(response => response.json())
-  .then(result => alert(result));
+  .then(() => load_mailbox('sent'));
 
   return false;
 }
@@ -47,11 +48,12 @@ function send_email() {
 function load_mailbox(mailbox) {
   
   // Show the mailbox and hide other views
-  document.querySelector('#emails-view').style.display = 'block';
+  document.querySelector('#email-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#inbox-view').style.display = 'block';
 
   // Show the mailbox name
-  const inboxDiv = document.querySelector('#emails-view');
+  const inboxDiv = document.querySelector('#inbox-view');
   inboxDiv.innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
 
   fetch('/emails/inbox')
@@ -63,16 +65,53 @@ function load_mailbox(mailbox) {
         inboxList.setAttribute('class', 'list-group');    
 
         emails.forEach(email => {
-          let inboxMail = document.createElement('a');
+          const inboxMail = document.createElement('button');
           inboxMail.setAttribute('class', 'list-group-item list-group-item-action');
-          inboxMail.setAttribute('href', `/emails/${email.id}`);
-          inboxMail.innerHTML = `<span class='list-group-item-sender'>${email.sender}</span>
-            <span class='list-group-item-subject'>${email.subject}</span>`
+          inboxMail.innerHTML = `<b class='list-group-item-sender'>${email.sender}</b>
+            <span class='list-group-item-subject'>${email.subject}</span>
+            <span class='list-group-item-timestamp'>${email.timestamp}</span>`
 
+          if (email.read) {
+            inboxMail.style.backgroundColor = '#F8F9FA';
+          }
+
+          inboxMail.addEventListener('click', () => read_email(email.id))
           inboxList.append(inboxMail);
-        })
+        });
 
         inboxDiv.append(inboxList);
       }  
   });
+}
+
+function read_email(id) {
+
+  document.querySelector('#inbox-view').style.display = 'none';
+  document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#email-view').style.display = 'block';
+
+  fetch(`/emails/${id}`)
+  .then(response => response.json())
+  .then(email => {
+    console.log(email)
+
+    let recipients = '';
+
+    email.recipients.forEach(recipient => {
+      recipients += recipient + ', ';
+    });
+
+    document.querySelector('#email-subject').innerHTML = email.subject;
+    document.querySelector('#email-from').innerHTML = email.sender;
+    document.querySelector('#email-to').innerHTML = recipients.slice(0,-2);
+    document.querySelector('#email-date').innerHTML = email.timestamp;
+    document.querySelector('#email-body').innerHTML = email.body;
+  });
+
+  fetch(`/emails/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+        read: true
+    })
+  });  
 }

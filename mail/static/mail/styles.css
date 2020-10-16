@@ -10,8 +10,19 @@ textarea {
     height: 50px;
 }
 
-.list-group-item-sender {
+.list-group-item:hover {
+    background-color: white;
+    box-shadow: 0px 0px 6px #d1d1d1;
+}
+
+.list-group-item-sender {   
     display: inline-block;
     width: 25%;
-    font-weight: bold;
+}
+
+.list-group-item-timestamp {
+    float: right;
+    width: 20%;
+    text-align: right;
+    color: #BDBFC2;
 }
