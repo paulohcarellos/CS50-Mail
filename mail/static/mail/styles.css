@@ -18,6 +18,15 @@ textarea {
 .list-group-item-sender {   
     display: inline-block;
     width: 25%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.list-group-item-subject {   
+    display: inline-block;
+    width: 50%;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .list-group-item-timestamp {

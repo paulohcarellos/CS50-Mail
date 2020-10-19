@@ -59,7 +59,7 @@ function load_mailbox(mailbox) {
   fetch(`/emails/${mailbox}`)
   .then(response => response.json())
   .then(emails => {
-      console.log(emails);
+
       if(emails.length > 0){
 
         const inboxList = document.createElement('div');
@@ -68,7 +68,7 @@ function load_mailbox(mailbox) {
         emails.forEach(email => {
           const inboxMail = document.createElement('button');
           inboxMail.setAttribute('class', 'list-group-item list-group-item-action');
-          inboxMail.innerHTML = `<b class='list-group-item-sender'>${email.sender}</b>
+          inboxMail.innerHTML = `<b class='list-group-item-sender'>${(mailbox === 'sent') ? email.recipients : email.sender}</b>
             <span class='list-group-item-subject'>${email.subject}</span>
             <span class='list-group-item-timestamp'>${email.timestamp}</span>`
 
@@ -91,6 +91,9 @@ function read_email(id, mailbox) {
   document.querySelector('#compose-view').style.display = 'none';
   document.querySelector('#email-view').style.display = 'block';
 
+  const reply = document.querySelector('#reply');
+  const archive = document.querySelector('#archive');
+
   fetch(`/emails/${id}`)
   .then(response => response.json())
   .then(email => {
@@ -106,6 +109,8 @@ function read_email(id, mailbox) {
     document.querySelector('#email-to').innerHTML = recipients.slice(0,-2);
     document.querySelector('#email-date').innerHTML = email.timestamp;
     document.querySelector('#email-body').innerHTML = email.body;
+
+    reply.addEventListener('click', () => reply_email(email.sender, email.subject, email.timestamp, email.body), {once: true})
   });
 
   fetch(`/emails/${id}`, {
@@ -114,8 +119,6 @@ function read_email(id, mailbox) {
         read: true
     })
   })
-  
-  const archive = document.querySelector('#archive');
 
   if (mailbox === 'inbox') {
     archive.innerHTML = 'Archive'
@@ -136,4 +139,15 @@ function archive_email(id, value) {
     })
   })
   .then(() => load_mailbox(value ? 'archive' : 'inbox'));
+}
+
+function reply_email(recipient, subject, body, timestamp) {
+
+  document.querySelector('#inbox-view').style.display = 'none';
+  document.querySelector('#email-view').style.display = 'none';
+  document.querySelector('#compose-view').style.display = 'block';
+
+  document.querySelector('#compose-recipients').value = recipient;
+  document.querySelector('#compose-subject').value = `Re: ${subject}`;
+  document.querySelector('#compose-body').value = `${body}\n\n${timestamp}`;
 }
