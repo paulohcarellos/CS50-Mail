@@ -59,7 +59,7 @@ function load_mailbox(mailbox) {
   fetch(`/emails/${mailbox}`)
   .then(response => response.json())
   .then(emails => {
-
+      console.log(emails);
       if(emails.length > 0){
 
         const inboxList = document.createElement('div');
@@ -76,27 +76,16 @@ function load_mailbox(mailbox) {
             inboxMail.style.backgroundColor = '#F8F9FA';
           }
 
-          inboxMail.addEventListener('click', () => read_email(email.id))
+          inboxMail.addEventListener('click', () => read_email(email.id, mailbox))
           inboxList.append(inboxMail);
         });
 
         inboxDiv.append(inboxList);
       }  
   });
-
-  const archive = document.querySelector('#archive');
-
-  if (mailbox === 'inbox') {
-    archive.innerHTML = 'Archive'
-    archive.addEventListener('click', () => archive_email(id, true));
-  }
-  else {
-    archive.innerHTML = 'Unarchive'
-    archive.addEventListener('click', () => archive_email(id, false));
-  }
 }
 
-function read_email(id) {
+function read_email(id, mailbox) {
 
   document.querySelector('#inbox-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'none';
@@ -124,7 +113,18 @@ function read_email(id) {
     body: JSON.stringify({
         read: true
     })
-  })  
+  })
+  
+  const archive = document.querySelector('#archive');
+
+  if (mailbox === 'inbox') {
+    archive.innerHTML = 'Archive'
+    archive.addEventListener('click', () => archive_email(id, true), {once: true});
+  }
+  else {
+    archive.innerHTML = 'Unarchive'
+    archive.addEventListener('click', () => archive_email(id, false), {once: true});
+  }
 }
 
 function archive_email(id, value) {
@@ -132,8 +132,8 @@ function archive_email(id, value) {
   fetch(`/emails/${id}`, {
     method: 'PUT',
     body: JSON.stringify({
-        archived: true
+        archived: value
     })
   })
-  .then(() => load_mailbox((value ? 'archive' : 'inbox')))
+  .then(() => load_mailbox(value ? 'archive' : 'inbox'));
 }
